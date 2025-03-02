@@ -1,28 +1,30 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import ReactLoading from "react-loading";
-// import Swal from "sweetalert2";
-// import withReactContent from "sweetalert2-react-content";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 import { Link } from "react-router-dom";
+import ScreenLoading from "../componunts/ScreenLoading";
+import { LoadingContext } from "../LoadingContext";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
-function ProductsPage() {
+function Products() {
     const [products, setProducts] = useState([]);
-    const [isScreenLoading, setIsScreenLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
 
     useEffect(() => {
         const getProducts = async () => {
             setIsScreenLoading(true);
             try {
                 const res = await axios.get(
-                    `${baseUrl}/v2/api/${apiPath}/products`
+                    `${baseUrl}/api/${apiPath}/products`
                 );
                 setProducts(res.data.products);
             } catch (error) {
-                console.log("取得產品失敗", error.response?.data?.message);
+                showSwalError("取得產品失敗", error.response?.data?.message);
             } finally {
                 setIsScreenLoading(false);
             }
@@ -40,37 +42,37 @@ function ProductsPage() {
             },
         };
         try {
-            await axios.post(`${baseUrl}/v2/api/${apiPath}/cart`, productData);
-            alert("已加入購物車");
+            await axios.post(`${baseUrl}/api/${apiPath}/cart`, productData);
+            showSwal("已加入購物車");
         } catch (error) {
-            alert("加入購物車失敗", error.response?.data?.message);
+            showSwalError("加入購物車失敗", error.response?.data?.message);
         } finally {
             setIsLoading(false);
         }
     };
 
     // sweetalert成功提示
-    // const showSwal = (text) => {
-    //     withReactContent(Swal).fire({
-    //         title: text,
-    //         icon: "success",
-    //         toast: true,
-    //         position: "top-end",
-    //         showConfirmButton: false,
-    //         timer: 1500,
-    //         timerProgressBar: true,
-    //         width: "20%",
-    //     });
-    // };
+    const showSwal = (text) => {
+        withReactContent(Swal).fire({
+            title: text,
+            icon: "success",
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+            width: "20%",
+        });
+    };
 
     // sweetalert錯誤提示
-    // const showSwalError = (text, error) => {
-    //     withReactContent(Swal).fire({
-    //         title: text,
-    //         text: error,
-    //         icon: "error",
-    //     });
-    // };
+    const showSwalError = (text, error) => {
+        withReactContent(Swal).fire({
+            title: text,
+            text: error,
+            icon: "error",
+        });
+    };
 
     return (
         <>
@@ -98,10 +100,13 @@ function ProductsPage() {
                                     <td>{product.title}</td>
                                     <td>
                                         <del className="h6">
-                                            原價 {product.origin_price} 元
+                                            原價{" "}
+                                            {product.origin_price.toLocaleString()}{" "}
+                                            元
                                         </del>
                                         <div className="h5">
-                                            特價 {product.price}元
+                                            特價{" "}
+                                            {product.price.toLocaleString()}元
                                         </div>
                                     </td>
                                     <td>
@@ -137,28 +142,10 @@ function ProductsPage() {
                         </tbody>
                     </table>
                 </div>
-
-                {isScreenLoading && (
-                    <div
-                        className="d-flex justify-content-center align-items-center"
-                        style={{
-                            position: "fixed",
-                            inset: 0,
-                            backgroundColor: "rgba(255,255,255,0.3)",
-                            zIndex: 999,
-                        }}
-                    >
-                        <ReactLoading
-                            type="spokes"
-                            color="gray"
-                            width="4rem"
-                            height="4rem"
-                        />
-                    </div>
-                )}
+                {isScreenLoading && <ScreenLoading />}
             </div>
         </>
     );
 }
 
-export default ProductsPage;
+export default Products;

@@ -1,16 +1,14 @@
-// import { StrictMode } from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { Provider } from "react-redux";
+import { store } from "./store/store.js";
 import App from "./App.jsx";
-import { createHashRouter, RouterProvider } from "react-router-dom";
-import routes from "./routes/index.jsx";
-
-const router = createHashRouter(routes);
+import "bootstrap/dist/css/bootstrap.min.css";
 
 createRoot(document.getElementById("root")).render(
-  // <StrictMode>
-    <RouterProvider router={router}>
-      <App />
-    </RouterProvider>
-  // </StrictMode>
+    <StrictMode>
+        <Provider store={store}>
+            <App />
+        </Provider>
+    </StrictMode>
 );

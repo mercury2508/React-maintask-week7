@@ -1,12 +1,14 @@
 import FrontLayout from "../layouts/FrontLayout";
-import ProductsPage from "../front_pages/ProductsPage";
-import Home from "../front_pages/HomePage";
-import ProductDetailPage from "../front_pages/ProductDetailpage";
-import Cart from "../front_pages/CartPage";
-import LoginPage from "../front_pages/LoginPage";
-import NotFound from "../front_pages/NotFoundPage";
+import Home from "../front_pages/Home";
+import Products from "../front_pages/Products";
+import ProductDetail from "../front_pages/ProductDetail";
+import Cart from "../front_pages/Cart";
+import LoginPage from "../front_pages/Login";
+
 import AdminLayout from "../layouts/AdminLayout";
-import AdminProductsPage from "../admin_pages/AdminProductsPage";
+import AdminProducts from "../admin_pages/AdminProducts";
+
+import NotFound from "../front_pages/NotFound";
 
 const routes = [
     {
@@ -15,40 +17,40 @@ const routes = [
         children: [
             {
                 path: "",
-                element: <Home />
+                element: <Home />,
             },
             {
                 path: "products",
-                element: <ProductsPage />
+                element: <Products />,
             },
             {
                 path: "products/:id",
-                element: <ProductDetailPage />
+                element: <ProductDetail />,
             },
             {
                 path: "cart",
-                element: <Cart />
+                element: <Cart />,
             },
             {
                 path: "login",
-                element: <LoginPage />
+                element: <LoginPage />,
             },
-        ]
+        ],
     },
     {
         path: "admin",
         element: <AdminLayout />,
         children: [
             {
-                path:"",
-                element: <AdminProductsPage />
-            }
-        ]
+                path: "",
+                element: <AdminProducts />,
+            },
+        ],
     },
     {
         path: "*",
-        element: <NotFound />
-    }
-]
+        element: <NotFound />,
+    },
+];
 
 export default routes;

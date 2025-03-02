@@ -2,6 +2,8 @@ import PropTypes from "prop-types";
 import axios from "axios";
 import { Modal } from "bootstrap";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { pushMessage } from "../slice/toastSlice";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
@@ -85,8 +87,12 @@ function ProductModal({
         });
     };
 
+    const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false);
+
     // 新增產品
     const addNewProduct = async () => {
+        setIsLoading(true);
         try {
             const productData = {
                 data: {
@@ -100,16 +106,30 @@ function ProductModal({
                 `${baseUrl}/api/${apiPath}/admin/product`,
                 productData
             );
-            alert("新增產品成功");
             setModalData({ ...tempProduct });
             closeModal();
+            dispatch(
+                pushMessage({
+                    text: "已新增產品",
+                    status: "success",
+                })
+            );
         } catch (error) {
-            alert(`欄位尚未填寫:${error.response.data.message}`);
+            const errorMsg = error.response.data.message;
+            dispatch(
+                pushMessage({
+                    text: `產品新增失敗: ${errorMsg}`,
+                    status: "failed",
+                })
+            );
+        } finally {
+            setIsLoading(false);
         }
     };
 
     // 編輯產品
     const adjustProduct = async () => {
+        setIsLoading(true);
         try {
             const productData = {
                 data: {
@@ -119,14 +139,26 @@ function ProductModal({
                     is_enabled: modalData.is_enabled ? 1 : 0,
                 },
             };
-            await axios.put(
+            const res = await axios.put(
                 `${baseUrl}/api/${apiPath}/admin/product/${modalData.id}`,
                 productData
             );
-            alert("已編輯產品");
             closeModal();
+            dispatch(
+                pushMessage({
+                    text: res.data.message,
+                    status: "success",
+                })
+            );
         } catch (error) {
-            alert(`產品編輯失敗:${error}`);
+            dispatch(
+                pushMessage({
+                    text: error.message,
+                    status: "failed",
+                })
+            );
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -159,7 +191,12 @@ function ProductModal({
                 imageUrl: uploadedUrl,
             });
         } catch (error) {
-            alert(`圖片上傳失敗:${error}`);
+            dispatch(
+                pushMessage({
+                    text: `圖片上傳失敗:${error.message}`,
+                    status: "failed",
+                })
+            );
         }
     };
 
@@ -236,15 +273,21 @@ function ProductModal({
                                                     className="mb-2"
                                                 >
                                                     <label
-                                                        htmlFor={`imagesUrl-${index + 1}`}
+                                                        htmlFor={`imagesUrl-${
+                                                            index + 1
+                                                        }`}
                                                         className="form-label"
                                                     >
                                                         副圖 {index + 1}
                                                     </label>
                                                     <input
-                                                        id={`imagesUrl-${index + 1}`}
+                                                        id={`imagesUrl-${
+                                                            index + 1
+                                                        }`}
                                                         type="text"
-                                                        placeholder={`圖片網址 ${index + 1}`}
+                                                        placeholder={`圖片網址 ${
+                                                            index + 1
+                                                        }`}
                                                         className="form-control mb-2"
                                                         value={image}
                                                         onChange={(e) =>
@@ -257,7 +300,9 @@ function ProductModal({
                                                     {image && (
                                                         <img
                                                             src={image}
-                                                            alt={`副圖 ${index + 1}`}
+                                                            alt={`副圖 ${
+                                                                index + 1
+                                                            }`}
                                                             className="img-fluid mb-2"
                                                         />
                                                     )}
@@ -473,6 +518,7 @@ function ProductModal({
                                 type="button"
                                 className="btn btn-primary"
                                 onClick={handleUpdateProduct}
+                                disabled={isLoading}
                             >
                                 確認
                             </button>
@@ -495,8 +541,8 @@ ProductModal.propTypes = {
         title: PropTypes.string,
         category: PropTypes.string,
         unit: PropTypes.string,
-        origin_price: PropTypes.string,
-        price: PropTypes.string,
+        origin_price: PropTypes.number,
+        price: PropTypes.number,
         description: PropTypes.string,
         content: PropTypes.string,
         is_enabled: PropTypes.number,

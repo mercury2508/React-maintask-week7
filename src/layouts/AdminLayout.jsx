@@ -1,4 +1,9 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import Toast from "../componunts/Toast";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { pushMessage } from "../slice/toastSlice";
+const baseUrl = import.meta.env.VITE_BASE_URL;
 
 const routes = [
     { path: "/", name: "首頁" },
@@ -6,6 +11,26 @@ const routes = [
 ];
 
 function AdminLayout() {
+    const dispatch = useDispatch();
+
+    // 登出功能
+    const navigate = useNavigate();
+    const handleLogout = async () => {
+        try {
+            await axios.post(`${baseUrl}/logout`);
+            alert("已成功登出");
+            navigate("/login");
+            document.cookie = "hexToken=; max-age=0; path=/";
+        } catch (error) {
+            dispatch(
+                pushMessage({
+                    text: error.message,
+                    status: "failed",
+                })
+            );
+        }
+    };
+
     return (
         <>
             <nav
@@ -25,9 +50,17 @@ function AdminLayout() {
                                 </NavLink>
                             </li>
                         ))}
+                        <button
+                            type="button"
+                            className="btn btn-outline-light btn-sm"
+                            onClick={() => handleLogout()}
+                        >
+                            登出
+                        </button>
                     </ul>
                 </div>
             </nav>
+            <Toast />
             <Outlet />
         </>
     );

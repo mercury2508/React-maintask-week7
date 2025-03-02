@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
-import ReactLoading from "react-loading";
-// import Swal from "sweetalert2";
-// import withReactContent from "sweetalert2-react-content";
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import ScreenLoading from "../componunts/ScreenLoading";
+import { LoadingContext } from "../LoadingContext";
 
 const baseUrl = import.meta.env.VITE_BASE_URL;
 const apiPath = import.meta.env.VITE_API_PATH;
 
 function Cart() {
-    const [isScreenLoading, setIsScreenLoading] = useState(false);
     const [cartItem, setCartItem] = useState({});
+    const { isScreenLoading, setIsScreenLoading } = useContext(LoadingContext);
 
     useEffect(() => {
         getCartList();
@@ -19,35 +20,35 @@ function Cart() {
     //取得購物車內容
     const getCartList = async () => {
         try {
-            const res = await axios.get(`${baseUrl}/v2/api/${apiPath}/cart`);
+            const res = await axios.get(`${baseUrl}/api/${apiPath}/cart`);
             setCartItem(res.data.data);
         } catch (error) {
-            alert("取得購物車失敗", error.response?.data?.message);
+            showSwalError("取得購物車失敗", error.response?.data?.message);
         }
     };
 
     // sweetalert成功提示
-    // const showSwal = (text) => {
-    //     withReactContent(Swal).fire({
-    //         title: text,
-    //         icon: "success",
-    //         toast: true,
-    //         position: "top-end",
-    //         showConfirmButton: false,
-    //         timer: 1500,
-    //         timerProgressBar: true,
-    //         width: "20%",
-    //     });
-    // };
+    const showSwal = (text) => {
+        withReactContent(Swal).fire({
+            title: text,
+            icon: "success",
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true,
+            width: "20%",
+        });
+    };
 
     // sweetalert錯誤提示
-    // const showSwalError = (text, error) => {
-    //     withReactContent(Swal).fire({
-    //         title: text,
-    //         text: error,
-    //         icon: "error",
-    //     });
-    // };
+    const showSwalError = (text, error) => {
+        withReactContent(Swal).fire({
+            title: text,
+            text: error,
+            icon: "error",
+        });
+    };
 
     // 表單驗證
     const {
@@ -75,12 +76,12 @@ function Cart() {
     const checkout = async (submitData) => {
         setIsScreenLoading(true);
         try {
-            await axios.post(`${baseUrl}/v2/api/${apiPath}/order`, submitData);
+            await axios.post(`${baseUrl}/api/${apiPath}/order`, submitData);
             getCartList();
             reset();
-            alert("已送出訂單!");
+            showSwal("已送出訂單!");
         } catch (error) {
-            alert("送出訂單失敗", error.response?.data?.message);
+            showSwalError("送出訂單失敗", error.response?.data?.message);
         } finally {
             setIsScreenLoading(false);
         }
@@ -97,12 +98,12 @@ function Cart() {
         setIsScreenLoading(true);
         try {
             await axios.put(
-                `${baseUrl}/v2/api/${apiPath}/cart/${cart_id}`,
+                `${baseUrl}/api/${apiPath}/cart/${cart_id}`,
                 itemData
             );
             getCartList();
         } catch (error) {
-            alert("調整商品數量失敗", error.response?.data?.message);
+            showSwalError("調整商品數量失敗", error.response?.data?.message);
         } finally {
             setIsScreenLoading(false);
         }
@@ -112,10 +113,10 @@ function Cart() {
     const deleteCarts = async () => {
         setIsScreenLoading(true);
         try {
-            await axios.delete(`${baseUrl}/v2/api/${apiPath}/carts`);
+            await axios.delete(`${baseUrl}/api/${apiPath}/carts`);
             getCartList();
         } catch (error) {
-            alert("清空購物車失敗", error.response?.data?.message);
+            showSwalError("清空購物車失敗", error.response?.data?.message);
         } finally {
             setIsScreenLoading(false);
         }
@@ -125,10 +126,10 @@ function Cart() {
     const deleteCartItem = async (id) => {
         setIsScreenLoading(true);
         try {
-            await axios.delete(`${baseUrl}/v2/api/${apiPath}/cart/${id}`);
+            await axios.delete(`${baseUrl}/api/${apiPath}/cart/${id}`);
             getCartList();
         } catch (error) {
-            alert("刪除購物車商品失敗", error.response?.data?.message);
+            showSwalError("刪除購物車商品失敗", error.response?.data?.message);
         } finally {
             setIsScreenLoading(false);
         }
@@ -221,7 +222,7 @@ function Cart() {
                                         </div>
                                     </td>
                                     <td className="text-end">
-                                        {item.final_total}
+                                        {item.final_total.toLocaleString()}
                                     </td>
                                 </tr>
                             ))}
@@ -235,7 +236,7 @@ function Cart() {
                                     className="text-end"
                                     style={{ width: "130px" }}
                                 >
-                                    {cartItem.total}
+                                    {cartItem.total.toLocaleString()}
                                 </td>
                             </tr>
                         </tfoot>
@@ -253,7 +254,9 @@ function Cart() {
                             <input
                                 id="email"
                                 type="email"
-                                className={`form-control ${errors.email ? "is-invalid" : ""}`}
+                                className={`form-control ${
+                                    errors.email ? "is-invalid" : ""
+                                }`}
                                 placeholder="請輸入 Email"
                                 {...register("email", {
                                     required: {
@@ -280,7 +283,9 @@ function Cart() {
                             </label>
                             <input
                                 id="name"
-                                className={`form-control ${errors.name ? "is-invalid" : ""}`}
+                                className={`form-control ${
+                                    errors.name ? "is-invalid" : ""
+                                }`}
                                 placeholder="請輸入姓名"
                                 {...register("name", {
                                     required: {
@@ -304,7 +309,9 @@ function Cart() {
                             <input
                                 id="tel"
                                 type="tel"
-                                className={`form-control ${errors.tel ? "is-invalid" : ""}`}
+                                className={`form-control ${
+                                    errors.tel ? "is-invalid" : ""
+                                }`}
                                 placeholder="請輸入電話"
                                 {...register("tel", {
                                     required: {
@@ -332,7 +339,9 @@ function Cart() {
                             <input
                                 id="address"
                                 type="text"
-                                className={`form-control ${errors.address ? "is-invalid" : ""}`}
+                                className={`form-control ${
+                                    errors.address ? "is-invalid" : ""
+                                }`}
                                 placeholder="請輸入地址"
                                 {...register("address", {
                                     required: {
@@ -373,24 +382,7 @@ function Cart() {
                     </form>
                 </div>
             </div>
-            {isScreenLoading && (
-                <div
-                    className="d-flex justify-content-center align-items-center"
-                    style={{
-                        position: "fixed",
-                        inset: 0,
-                        backgroundColor: "rgba(255,255,255,0.3)",
-                        zIndex: 999,
-                    }}
-                >
-                    <ReactLoading
-                        type="spokes"
-                        color="gray"
-                        width="4rem"
-                        height="4rem"
-                    />
-                </div>
-            )}
+            {isScreenLoading && <ScreenLoading />}
         </>
     );
 }

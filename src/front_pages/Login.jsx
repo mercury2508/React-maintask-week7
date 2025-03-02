@@ -21,6 +21,17 @@ function LoginPage() {
         });
     };
 
+    // 登入處理
+    const handleLogin = (event) => {
+        event.preventDefault();
+        const { username, password } = account;
+        if (username && password !== "") {
+            loginButton(event);
+        } else {
+            alert("Email Address或Password有誤");
+        }
+    };
+
     // 登入功能
     const loginButton = (event) => {
         event.preventDefault();
@@ -31,11 +42,13 @@ function LoginPage() {
                     account
                 );
                 const { token, expired } = res.data;
-                document.cookie = `hexToken=${token}; expires=${new Date({ expired })}`;
+                document.cookie = `hexToken=${token}; expires=${new Date({
+                    expired,
+                })}`;
                 axios.defaults.headers.common["Authorization"] = token;
-                if(res.data?.success){
+                if (res.data?.success) {
                     navigate("/admin");
-                } else{
+                } else {
                     alert(res.data?.error?.message);
                 }
             } catch (error) {
@@ -74,7 +87,7 @@ function LoginPage() {
                 <h1 className="mb-5">請先登入</h1>
                 <form
                     className="d-flex flex-column gap-3"
-                    onSubmit={loginButton}
+                    onSubmit={handleLogin}
                 >
                     <div className="form-floating mb-3">
                         <input
