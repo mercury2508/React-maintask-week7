@@ -114,7 +114,7 @@ function ProductDetail() {
                             </div>
                             <p className="mb-3">{product.description}</p>
                             <p className="mb-3">{product.content}</p>
-                            <h5 className="mb-3">NT$ {product.price}</h5>
+                            <h5 className="mb-3">NT$ {product?.price?.toLocaleString()}</h5>
                             <div className="input-group align-items-center w-75">
                                 <select
                                     value={qtySelect}
